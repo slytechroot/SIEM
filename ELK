@@ -1,0 +1,155 @@
+ ELK - Threat Hunting - syntax
+
+
+    Access to Service Control Manager from non admin hosts
+event_id:5145 AND event_data.ShareName.keyword:*IPC* AND event_data.RelativeTargetName:svcctl AND -(enrich.cmdb.SourceIp.tags:admin OR enrich.assets.SourceIp.zone:administrativenet)
+
+    Accessibility features binaries replacement
+source_name:*Sysmon AND event_id:11 AND event_data.TargetFilename:("*\\sethc.exe" "*\\utilman.exe" "*\\osk.exe" "*\\narrator.exe" "*\\magnify.exe" "*\\displayswitch.exe")
+
+    All events
+*
+
+    Already created WMI subscriptions
+log_name:Autoruns AND event_data.Category:WMI  AND event_data.Entry:* AND -event_data.Entry:(BVTConsumer *DellPower*)
+
+    Copy executable files or scripts via administrative share
+event_id:5145 AND event_data.ShareName.keyword:*$ AND -event_data.ShareName.keyword:*IPC* AND event_data.RelativeTargetName:(*exe *ps1 *vbs *js *dll) AND event_data.AccessList:(%%4417 %%4418 %%1537) AND -enrich.cmdb.SourceIp.tags:admin
+
+    Events with hunts
+hunts:*
+
+    Files that are named like system processes, but located in the wrong place
+( event_data.Image:("*\\rundll32.exe" "*\\svchost.exe" "*\\wmiprvse.exe" "*\\wmiadap.exe" "*\\smss.exe" "*\\wininit.exe" "*\\taskhost.exe" "*\\lsass.exe" "*\\winlogon.exe" "*\\csrss.exe" "*\\services.exe" "*\\svchost.exe" "*\\lsm.exe" "*\\conhost.exe" "*\\dllhost.exe" "*\\dwm.exe" "*\\spoolsv.exe" "*\\wuauclt.exe" "*\\taskhost.exe" "*\\taskhostw.exe" "*\\fontdrvhost.exe" "*\\searchindexer.exe" "*\\searchprotocolhost.exe" "*\\searchfilterhost.exe" "*\\sihost.exe") AND -event_data.Image:("*\\system32\\*" "*\\syswow64\\*" "*\\winsxs\\*") ) OR ( event_data.TargetFilename:("*\\rundll32.exe" "*\\svchost.exe" "*\\wmiprvse.exe" "*\\wmiadap.exe" "*\\smss.exe" "*\\wininit.exe" "*\\taskhost.exe" "*\\lsass.exe" "*\\winlogon.exe" "*\\csrss.exe" "*\\services.exe" "*\\svchost.exe" "*\\lsm.exe" "*\\conhost.exe" "*\\dllhost.exe" "*\\dwm.exe" "*\\spoolsv.exe" "*\\wuauclt.exe" "*\\taskhost.exe" "*\\taskhostw.exe" "*\\fontdrvhost.exe" "*\\searchindexer.exe" "*\\searchprotocolhost.exe" "*\\searchfilterhost.exe" "*\\sihost.exe") AND -event_data.TargetFilename:("*\\system32\\*" "*\\syswow64\\*" "*\\winsxs\\*") )
+
+    Incoming Active Directory DB replication request from non DC
+event_id:4662 AND event_data.ObjectServer:DS AND -event_data.SubjectUserName:(*DC0*) AND event_data.ObjectType:"%{19195a5b-6da0-11d0-afd3-00c04fd930c9}" AND event_data.Properties:("{1131f6aa-9c07-11d1-f79f-00c04fc2dcd2}" "{1131f6ad-9c07-11d1-f79f-00c04fc2dcd2}") AND -enrich.cmdb.SourceIp.tags:dc
+
+    Lateral movement - process execution in network logon session
+event_id:1 AND source_name:*Sysmon AND event_data.LogonType:3
+
+    Lateral movement via scheduled tasks
+event_id:("4698" "4702") AND event_data.LogonType:3
+
+    Lsass load library, that isn't signed by Microsoft
+event_id:7 AND event_data.Image:"*\\lsass.exe" AND -event_data.Signature:*Microsoft*
+
+
+    Mimikatz command line patterns
+event_data.CommandLine:(*mimikatz* *mimidrv* *mimilib* *DumpCerts* *DumpCreds* *invoke-mimikatz*) OR (event_data.CommandLine:(*kerberos* *sekurlsa* *lsadump* *dpapi* *logonpasswords* *privilege* "*rpc\:\:server*" "*service\:\:me*" *token* *vault*) AND event_data.CommandLine.keyword:*\:\:* )
+
+    Mimikatz file metadata
+event_data.Description:(*mimidrv* *mimikatz* *mimilib*) OR event_data.Product:(*mimidrv* *mimikatz* *mimilib*) OR event_data.Company:(*gentilkiwi* "*Benjamin DELPY*") OR event_data.Signature:"Benjamin Delpy"
+
+    Persistence: All ASEP entries
+log_name:Autoruns
+
+    Possible DCShadow attack - suspicious DC object creation
+event_id:4662 AND event_data.ObjectServer:DS AND -event_data.SubjectUserName:(*DC0*) AND event_data.Properties:"%%7680 {bf967a92-0de6-11d0-a285-00aa003049e2}" AND event_data.AdditionalInfo:"CN=Servers,CN=Default-First-Site-Name,CN=Sites,CN=Configuration*"
+
+
+    Possible DCShadow attack - suspicious SPN for non DC computer account
+event_id:4742 AND event_data.ServicePrincipalNames:(*E3514235* "*GC/*")
+
+
+    Possible NTLM relay attack
+{"bool":{"must":[{"query_string":{"query":"event_id:4624 AND event_data.LogonType:3 AND event_data.AuthenticationPackageName:NTLM AND event_data.DhcpSourceIp:*"}},{"script":{"script":"doc['event_data.SourceIp.keyword'].value != doc['event_data.DhcpSourceIp.keyword'].value?.toLowerCase()"}}]}}
+
+    Possible logon session hijackin
+event_data.Image:"*\\tscon.exe" AND (event_data.LogonId:0x3e7 OR event_data.SubjectLogonId:0x3e7 OR event_data.User:"NT AUTHORITY\\SYSTEM")
+
+    Powershell download cradles
+event_data.CommandLine:(*powershell* *pwsh* *SyncAppvPublishingServer*) AND event_data.CommandLine:(*BitsTransfer* *webclient* *DownloadFile* *downloadstring* *wget* *curl* *WebRequest* *WinHttpRequest*  iwr irm  "*internetExplorer.Application*" "*Msxml2.XMLHTTP*" "*MsXml2.ServerXmlHttp*")
+
+    Privilege escalation - Run whoami as System
+event_data.Image:"*\\whoami.exe" AND (event_data.LogonId:0x3e7 OR event_data.SubjectLogonId:0x3e7 OR event_data.User:"NT AUTHORITY\\SYSTEM")
+
+
+    Privilege escalation - Network Service to System
+event_id:1 event_data.ParentUser:"NT AUTHORITY\\NETWORK SERVICE" AND event_data.User:"System" AND event_data.IntegrityLevel:System
+
+    Privilege escalation via weak service permissions
+event_data.Image:"*\\sc.exe" AND (event_data.CommandLine:(*start* *sdshow*) OR (event_data.CommandLine:*config* AND event_data.CommandLine:*binPath*)) AND event_data.IntegrityLevel:Medium
+
+    Privileged network logon from non admin host
+event_id:4672 AND event_data.LogonType:3 AND (event_data.SourceIp:* OR event_data.WorkstationName:*) AND -enrich.cmdb.SourceIp.tags:admin AND -enrich.cmdb.WorkstationName.tags:admin
+
+    Replaced accessibility features binary execution
+event_id:1 AND event_data.Image:(*sethc* *utilman* *osk* *narrator* *magnify* *displayswitch*) AND -event_data.Description:("Display Switch" "Accessibility shortcut keys" "Screen Reader" *Magnifier* *Keyboard* "Utility Manager")
+
+    Suspicious BITS job
+source_name:"Microsoft-Windows-Bits-Client" AND event_id:("59" "60") AND -event_data.name:("*CCM Message Upload *" "*Push Notification Platform Job*" "*CCMSETUP DOWNLOAD*" "*Microsoft Outlook Offline Address Book*" *CCMDTS* "*WU Client Download*") AND -event_data.url:(*gvt1* *adobe* *yandex* *googleapis* *windowsupdate*)
+
+    Suspicious Code Injection
+event_id:8 AND source_name:"Microsoft-Windows-Sysmon" AND -(event_data.SourceImage:"*\\VBoxTray.exe" AND event_data.TargetImage:"*\\csrss.exe") AND -(event_data.StartFunction:EtwpNotificationThread AND event_data.SourceImage:"*\\rundll32.exe")
+
+    Suspicious LSASS SSP
+log_name:Autoruns  AND event_data.Category:"LSA Providers" AND event_data.Entry:* AND -event_data.Entry:(kerberos msv1_0 tspkg pku2u cloudAP wdigest schannel) AND event_data.EntryLocation:"*\\Security Packages"
+
+    Suspicious LSASS SSP was loaded
+event_id:4622 AND -event_data.SecurityPackageName:(*pku2u *TSSSP *NTLM *Negotiate *NegoExtender *Schannel *Kerberos *Wdigest "*Microsoft Unified Security Protocol Provider")
+
+    Suspicious LSASS memory access
+event_id:10 AND -event_data.GrantedAccess:(0x1000     0x1400 0x40) AND event_data.TargetImage:"*\\lsass.exe"
+
+
+    Suspicious LSASS password filter
+log_name:Autoruns  AND event_data.Category:"LSA Providers" AND event_data.Entry:* AND -event_data.Entry:(kerberos msv1_0 tspkg pku2u cloudAP wdigest schannel) AND event_data.EntryLocation:"*\\Notification Packages"
+
+    Suspicious LSASS password filter was loaded
+event_id:4614 AND -event_data.NotificationPackageName:(scecli rassfm WDIGEST KDCPw)
+
+
+    Suspicious powershell - execution of encoded script
+event_data.CommandLine:*powershell* AND (event_data.CommandLine:("* -e *" "* -en *" "* -ec *" "* -enc *" "* -enco" "* -encod" "* -encode" "* -encoded" "* -encodedc" "* -encodedco" "* -encodedcom" "* -encodedcomm" "* -encodedcomma" "* -encodedcomman" "* -encodedcommand") OR event_data.CommandLine:(*StreamReader* *GzipStream* *Decompress* *MemoryStream* *FromBase64String* )) AND -(event_id:7 AND event_data.ImageLoaded:*System.Management.Automation*)
+
+    Suspicious processes spawned from MS Office applications
+event_id:(1 OR 4688) AND (event_data.ParentOfParent:("*\\excel.exe" "*\\winword.exe" "*\\powepnt.exe" "*\\msaccess.exe" "*\\mspub.exe" "*\\outook.exe") OR event_data.ParentImage:("*\\excel.exe" "*\\winword.exe" "*\\powepnt.exe" "*\\msaccess.exe" "*\\mspub.exe" "*\\outook.exe")) AND event_data.Image:("*\\cmd.exe" "*\\powershell.exe" "*\\wscript.exe" "*\\cscript.exe" "*\\bitsadmin.exe" "*\\certutil.exe" "*\\schtasks.exe" "*\\rundll32.exe" "*\\regsvr32.exe" "*\\wmic.exe" "*\\mshta.exe" "*\\msiexec.exe" "*\\schtasks.exe" "*\\msbuild.exe") AND -filecmdline:(*chrome.nativeMessaging* "*\\spool\\DRIVERS\\*")
+
+    Suspicious services - credential dumping tools
+(event_id:("4697" "7045") OR (log_name:Autoruns AND event_data.Category:(Services Drivers)) )  AND (event_data.CommandLine:("*rpc::server*" "*service::me*" *fgexec* *servpw* *cachedump* *dumpsvc* *mimidrv* *mimikatz* *wceservice*  "*wce service*" *pwdump* *gsecdump* *cachedump*) OR event_data.ServiceName:(*fgexec* *servpw* *cachedump* *dumpsvc* *mimidrv* *mimikatz* *wceservice*  "*wce service*" *pwdump* *gsecdump* *cachedump*) OR event_data.Entry:(*fgexec* *servpw* **cachedump** *dumpsvc* *mimidrv* *mimikatz* *wceservice*  "*wce service*" *pwdump* *gsecdump* *cachedump*))
+
+    Suspicious services - executable from windows folder
+(event_id:("4697" "7045") OR (log_name:Autoruns AND event_data.Category:Services) ) AND event_data.CommandLine.keyword:/.*%[s|S][y|Y][s|S][t|T][e|E][m|M][r|R][o|O][o|O][t|T]%\\[^\\]*\.exe/ AND -event_data.CommandLine:(*paexe* *psexesvc* *winexesvc* *remcomsvc*)
+
+    Suspicious services - remote execution tools
+(event_id:("4697" "7045") OR (log_name:Autoruns AND event_data.Category:Services) )  AND (event_data.CommandLine:(*psexe* *winexe* *paexe* *remcom*) OR event_data.ServiceName:(*BTOBTO* *psexe* *winexe* *paexe* *remcom*) OR event_data.Entry:(*BTOBTO* *psexe* *winexe* *paexe* *remcom*))
+
+
+    Suspicious services - start system binaries
+event_id:("4697" "7045") AND event_data.CommandLine:(*rundll32* *regsvr32* *msbuild* *installutil* *odbcconf* *wmic* *msiexec* *cscript* *wscript* *cmd* *powershell* *comspec*)
+
+    Threat Hunting: Raw events
+*
+
+    Threat Hunting: Tagged events
+hunts:*
+
+
+    UAC bypass method using Windows event viewer
+( event_id:("1" "4688") AND event_data.ParentImage:"*\\eventvwr.exe" AND -event_data.Image:"*\\mmc.exe" ) OR ( event_id:13 AND  event_data.TargetObject:"*\\mscfile\\shell\\open\\command")
+
+    Using bits for downloading or uploading files
+( event_data.CommandLine:*bitsadmin* AND event_data.CommandLine:("*transfer* " "*addfile* " "*Add-BitsFile*" "*Start-BitsTransfer*") ) OR ( event_data.CommandLine:*powershell* AND event_data.CommandLine:("*Add-BitsFile*" "*Start-BitsTransfer*") )
+
+    Using certutil for downloading
+event_data.CommandLine:(*certutil*) AND event_data.CommandLine:(*urlcach* *url* *ping*) AND event_data.CommandLine:(*http* *ftp*)
+
+    Using certutil to decode base64 encoded files
+event_data.CommandLine:(*certutil*) AND event_data.CommandLine:(*decode*)
+
+
+    Using msiexec to execute msi form URL
+event_data.CommandLine:*msiexec* AND event_data.CommandLine:*http*
+
+    Using net tool for connection to administrative share
+event_data.CommandLine:*net* AND event_data.CommandLine:"*use *" AND event_data.CommandLine.keyword:*$*
+
+    WMI SquiblyDoo Attack
+event_data.CommandLine:*regsvr32* AND event_data.CommandLine:*scrobj*
+
+    WMI SquiblyTwo Attack
+event_data.CommandLine:*wmic* AND event_data.CommandLine:*format* AND event_data.CommandLine:(*ftp* *http*)
+
+    WMI subscription creation
+(event_id:("19" OR "20" OR "21") AND source_name:*Sysmon) OR (event_id:"5858" AND  user_data.Operation:(*EventConsumer* *EventFilter* *FilterToConsumerBinding*) AND -user_data.Operation:"*TargetInstance ISA*")
