@@ -1,0 +1,113 @@
+ Log Levels
+
+Level    Condition            Indication
+
+0           Emergency           The system has become unstable
+
+1            Alert                    A condition should be corrected immediately
+
+2            Critical                A failure in the system's primary application requires immediate attention
+
+3            Error                    Something is preventing proper system function
+
+4            Warning                An error will occur if action is not taken soon
+
+5            Notice                    The Event is unusual
+
+6            Information            Normal operational message that requires no action
+
+7            Debugging            Useful information for developers
+
+ 
+
+ 
+
+More...
+What are log levels?
+
+Computer system designers implement a logging function into devices and applications that automatically document events. Systems and application designers write their logging functions in compliance with the Syslog standard, whereby each log is assigned a facility code and a log level.
+
+Log levels describe the type and severity of a logged event based on the severity of the impact on users and the urgency of response required by the IT organization.
+Key takeaways
+
+    When an event occurs within an application, the logging function creates a log and adds it to the log file.
+    The general purpose of log levels is to categorize event logs according to the severity of impact on users and the urgency of response required by the IT organization.
+    Using log levels, a security analyst can look at a single value in an event log and determine if it needs to be investigated.
+    Application developers and IT organizations are free to customize log levels and categorize log events according to their own specific needs.
+    Organizations that maintain a large number of applications in one or more cloud environments use log management to capture event logs from throughout the system, centralize and normalize the data, perform analysis, and extract actionable insights.
+
+Why are log levels important?
+
+Log levels are just one of many types of data that are contained within the system and application event logs. Most logs contain at least the following information:
+
+    The date and time that the event happened
+
+    A description of the event
+
+    The log level or severity level
+
+    An error code, if applicable
+
+    The name of the user that was logged in when an event occurred
+
+    The name of the device where the event took place
+
+    The MAC address or IP address of the network device where the log was generated
+
+Log levels are a fundamental tool for tracking and analyzing events that take place throughout your IT infrastructure and cloud-based computing environments. Log files contain a wealth of information about all of the events that take place within a system and log levels allow users to categorize those events by type and severity so they can be treated accordingly.
+
+Using log levels, a security analyst can look at a single value in an event log and start to determine whether that event needs to be immediately investigated, whether it can be put off for later, or whether it can safely be ignored.
+What are the standard log levels?
+
+Application developers and IT organizations are free to customize log levels and categorize log events according to their own specific needs. For applications that log events based on the Syslog standard, there are eight different log levels that can be used to categorize a log according to its severity:
+
+Emergency
+
+Emergency logs are given the numerical value "0". This category is assigned when an event log indicates that the system is completely unusable.
+
+Alert
+
+Alert logs are given the numerical value "1." This category is assigned when an event log requires an immediate response, such as when a system database becomes corrupted and must be restored to prevent the loss of critical data or services.
+
+Critical
+
+Critical logs are given the numerical value "2." This category is assigned for critical errors, such as hardware failure.
+
+Error
+
+Error logs are given the numerical value "3." This category is assigned to event logs that contain an application error message.
+
+Warning
+
+Warning logs are given the numerical value "4." Warning conditions are slightly less severe than error conditions. Error conditions happen when an operation fails, while a warning might indicate that an operation will fail in the future if action is not taken now.
+
+Notice
+
+Notice logs are given the numerical value "5." They include information about events that may be unusual but are not errors. Notice logs are technically normal, but still significant enough to have their own severity level between information and warning.
+
+Informational
+
+Informational logs are given the numerical value "6." They include information about successful operations within the application, such as a successful start, pause, or exit of the application.
+
+Debug
+
+Debug logs are given the numerical value "7." These logs typically contain information that is only useful during the debug phase and may be of little value during production.
+Log levels and log management
+
+Organizations that maintain a large number of applications in one or more cloud environments use log management to capture event logs from throughout the system, centralize and normalize the data, perform analysis, and extract actionable insights. Log levels play an important role in supporting the log management process at each of its five stages:
+
+    Instrument and collect - IT organizations must implement the appropriate software tools to start collecting log data from different sources in the application stack. A log aggregator application may be configurable to assign specific log levels to event logs based on their content and characteristics.
+
+    Centralize and index - Data from event logs need to be aggregated, organized and indexed in a central location where it can be accessed on a single platform. This allows logs of various log levels from across the network to be analyzed side-by-side, which helps analysts detect patterns that may be connected to security or application performance incidents.
+
+    Search and analyze - Once log data is aggregated and indexed, humans or machines can search through the log files and conduct analysis. The purpose of log analysis is to identify any unexpected application behaviors that might indicate a security threat or poor application performance. Machine learning tools can use pattern recognition to detect underlying performance issues by analyzing large volumes of log data.
+
+    Monitor and alert - Log levels play a central role for organizations that use log management to monitor application status and trigger alerts when outliers, anomalies or suspicious patterns are detected. Log management software tools can be integrated with messaging applications to deliver alerts to security analysts based on log levels. This helps to ensure a rapid response to urgent application-related issues.
+
+    Report and dashboard - Log management software tools can be used to track and report on the frequency of each of the log levels within the aggregated and analyzed event logs. Organizations should work towards minimizing the number of errors that cause business interruptions by proactively addressing application errors that crop up in event logs.
+
+Use log levels to filter alerts with Sumo Logic
+
+IT organizations can configure log monitoring and alerting functions to notify ITOps when an event occurs that requires an urgent response. A common risk associated with this type of alert is known as alert fatigue: if IT operators receive too many alerts, they may accidentally overlook important events that require urgent action.
+
+Sumo Logic helps mitigate alert fatigue by using log levels to ensure that IT security and operations teams only receive alerts for events that are genuinely worthy of investigation. IT organizations can also use Sumo Logic to extract event logs with specific log levels and selectively monitor specific types of errors or warnings.
