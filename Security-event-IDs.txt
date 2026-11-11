@@ -7,6 +7,7 @@ Security event id’s
     4647 : User initiated log off
     4648 : User used explicit credentials for login (Run as)
     4672 : Special privileges given to a logon (Admin Login)
+    4740 : Account Lockout
     4776 : Domain controller attempted to validate credentials of account
     4768 : Kerberos requested TGT ticket
     4769 : Kerberos requested Service ticket
